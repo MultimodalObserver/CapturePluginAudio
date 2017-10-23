@@ -50,10 +50,11 @@ public class AudioRecorder {
     public void Recorder() {
         //Enumerates all available microphones
 	Mixer.Info[] mixerInfos = AudioSystem.getMixerInfo();
-        int i=0;
+        int i=0;             
+        inicio=System.currentTimeMillis();
 	for (Mixer.Info info: mixerInfos){
 		Mixer m = AudioSystem.getMixer(info);
-		Line.Info[] lineInfos = m.getTargetLineInfo();
+		Line.Info[] lineInfos = m.getTargetLineInfo();   
                 if(lineInfos.length>=1 && lineInfos[0].getLineClass().equals(TargetDataLine.class)){//Only prints out info is it is a Microphone
 		if(i==op_mic){//Only prints out info is it is a Microphone
                     DataLine.Info dLl = (DataLine.Info) lineInfos[0];
@@ -124,7 +125,6 @@ public class AudioRecorder {
     }
     
      public void StartRecord(){
-         inicio=System.currentTimeMillis();
          Recorder();
         }
         
