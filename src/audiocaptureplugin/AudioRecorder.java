@@ -51,7 +51,6 @@ public class AudioRecorder {
         //Enumerates all available microphones
 	Mixer.Info[] mixerInfos = AudioSystem.getMixerInfo();
         int i=0;             
-        inicio=System.currentTimeMillis();
 	for (Mixer.Info info: mixerInfos){
 		Mixer m = AudioSystem.getMixer(info);
 		Line.Info[] lineInfos = m.getTargetLineInfo();   
@@ -76,8 +75,8 @@ public class AudioRecorder {
         public void run(){
             try {
                 tD.open(aF);
-                tD.start();
-                
+                inicio=System.currentTimeMillis();
+                tD.start();                
                 AudioSystem.write(new AudioInputStream(tD), aFF_T, output);                
             } catch (Exception e) {
             }
