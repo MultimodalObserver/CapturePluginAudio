@@ -9,7 +9,10 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
+import javax.swing.JSlider;
 import javax.swing.JTextField;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import mo.core.ui.GridBConstraints;
@@ -19,10 +22,13 @@ import mo.organization.ProjectOrganization;
 public class AudioCaptureConfigurationDialog extends JDialog implements DocumentListener {
 
     JLabel errorLabel;
+    JLabel srValue;
     JTextField nameField;
     JButton accept;
     ProjectOrganization org;
     JComboBox cbMic;
+    JSlider sSR;
+    int SR;
     int op_mic;
 
     boolean accepted = false;
@@ -53,6 +59,9 @@ public class AudioCaptureConfigurationDialog extends JDialog implements Document
 
         JLabel label = new JLabel("Configuration name: ");
         JLabel mic = new JLabel("Select your device:");
+        JLabel samplerate = new JLabel("Select sample rate:");
+        srValue = new JLabel("8000");
+        sSR = new JSlider(4000,8000);
         
         Mixer.Info[] mixerInfos = AudioSystem.getMixerInfo();
         int i=0;
@@ -74,19 +83,30 @@ public class AudioCaptureConfigurationDialog extends JDialog implements Document
 		}
 	}
         cbMic = new JComboBox(microphones);
+        if(i>0){cbMic.setSelectedIndex(1);}
         nameField = new JTextField();
         nameField.getDocument().addDocumentListener(this);
+        sSR.setValue(8000);
 
         gbc.gx(0).gy(0).f(GridBConstraints.HORIZONTAL).a(GridBConstraints.FIRST_LINE_START).i(new Insets(5, 5, 5, 5));
         add(label, gbc);
         add(nameField, gbc.gx(2).wx(1).gw(3));        
         add(mic, gbc.gy(2).gx(0));
-        add(cbMic,gbc.gx(2).gy(2).wx(1).gw(3));
+        add(cbMic,gbc.gx(2).gy(2).wx(1).gw(3));       
+        add(samplerate, gbc.gy(4).gx(0));
+        add(srValue,gbc.gx(2).gy(4).wx(1).gw(1));
+        add(sSR,gbc.gy(6).wx(1).gw(2));
               
-
+        sSR.addChangeListener(new ChangeListener(){
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                srValue.setText(String.valueOf(sSR.getValue()));
+            }
+        });
+        
         errorLabel = new JLabel("");
         errorLabel.setForeground(Color.red);
-        add(errorLabel, gbc.gx(0).gy(5).gw(5).a(GridBConstraints.LAST_LINE_START).wy(1));
+        add(errorLabel, gbc.gx(0).gy(7).gw(5).a(GridBConstraints.LAST_LINE_START).wy(1));
 
         accept = new JButton("Accept");
         
@@ -95,6 +115,7 @@ public class AudioCaptureConfigurationDialog extends JDialog implements Document
             public void actionPerformed(ActionEvent e) {
                 accepted = true;                
                 op_mic=cbMic.getSelectedIndex();
+                SR=sSR.getValue();
                 setVisible(false);
                 dispose();
             }
@@ -128,7 +149,7 @@ public class AudioCaptureConfigurationDialog extends JDialog implements Document
         updateState();
     }
 
-    private void updateState() {
+    private void updateState() {        
         if (nameField.getText().isEmpty()) {
             errorLabel.setText("A name for this configuration must be specified");
             accept.setEnabled(false);

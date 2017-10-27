@@ -13,16 +13,21 @@ public class AudioCaptureConfiguration implements RecordableConfiguration {
     
     private String id;    
     private int op_mic;
+    private int SR;
     AudioRecorder wr;  
 
-    AudioCaptureConfiguration(String id,int op_mic) {
+    AudioCaptureConfiguration() {
+    }
+    
+    AudioCaptureConfiguration(String id,int op_mic,int SR) {
         this.id = id;
         this.op_mic = op_mic;
+        this.SR = SR;
     }
     
     @Override
     public void setupRecording(File stageFolder, ProjectOrganization org, Participant p) {
-         wr = new AudioRecorder(stageFolder, org, p,op_mic, this);
+         wr = new AudioRecorder(stageFolder, org, p,op_mic,SR, this);
     }
 
     @Override
@@ -43,7 +48,7 @@ public class AudioCaptureConfiguration implements RecordableConfiguration {
     @Override
     public File toFile(File parent) {
         try {
-            File f = new File(parent, "audio_"+id+"-"+op_mic+".xml");
+            File f = new File(parent, "audio_"+id+"-"+op_mic+"_"+SR+".xml");
             f.createNewFile();
             return f;
         } catch (IOException ex) {
@@ -56,9 +61,10 @@ public class AudioCaptureConfiguration implements RecordableConfiguration {
     public Configuration fromFile(File file) {
        String fileName = file.getName();
         if (fileName.contains("_") && fileName.contains(".") && fileName.contains("-")){
-            String newId = fileName.substring(fileName.indexOf('_') + 1, fileName.lastIndexOf("-"));            
-            String newOp_Mic = fileName.substring(fileName.indexOf('-') + 1, fileName.lastIndexOf("."));
-            AudioCaptureConfiguration c = new AudioCaptureConfiguration(newId,Integer.parseInt(newOp_Mic));
+            String newId = fileName.substring(fileName.indexOf('_') + 1, fileName.indexOf("-"));            
+            String newOp_Mic = fileName.substring(fileName.indexOf('-') + 1, fileName.lastIndexOf("_"));
+            String newSR = fileName.substring(fileName.lastIndexOf('_') + 1, fileName.lastIndexOf("."));
+            AudioCaptureConfiguration c = new AudioCaptureConfiguration(newId,Integer.parseInt(newOp_Mic),Integer.parseInt(newSR));
             return c;
         }
         return null;

@@ -27,7 +27,6 @@ import static mo.organization.ProjectOrganization.logger;
 
 public class AudioRecorder {
     AudioFileFormat.Type aFF_T = AudioFileFormat.Type.WAVE;
-    AudioFormat aF = new AudioFormat(8000.0F, 16, 1, true, false);
     TargetDataLine tD;
     Participant participant;
     ProjectOrganization org;
@@ -40,6 +39,7 @@ public class AudioRecorder {
     private Thread t;
     private long inicio,fin;
     private int op_mic;
+    private float SampleRate;
     
     AudioRecorder audio;
     
@@ -74,6 +74,7 @@ public class AudioRecorder {
     class hilo extends Thread{
         public void run(){
             try {
+                AudioFormat aF = new AudioFormat(SampleRate, 16, 1, true, false);
                 tD.open(aF);
                 inicio=System.currentTimeMillis();
                 tD.start();                
@@ -83,11 +84,12 @@ public class AudioRecorder {
         }
     }
     
-     public AudioRecorder(File stageFolder, ProjectOrganization org, Participant p,int op_mic,AudioCaptureConfiguration c){
+     public AudioRecorder(File stageFolder, ProjectOrganization org, Participant p,int op_mic,int SR,AudioCaptureConfiguration c){
         participant = p;
         this.org = org;
         this.config = c;
         this.op_mic=op_mic;
+        this.SampleRate = SR;
         createFile(stageFolder);
     }
 

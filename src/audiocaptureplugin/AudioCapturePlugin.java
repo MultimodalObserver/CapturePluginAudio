@@ -48,7 +48,7 @@ public class AudioCapturePlugin implements CaptureProvider {
         boolean accepted = dialog.showDialog();
 
         if (accepted) {
-            AudioCaptureConfiguration configuration = new AudioCaptureConfiguration(dialog.getConfigurationName(),dialog.op_mic);
+            AudioCaptureConfiguration configuration = new AudioCaptureConfiguration(dialog.getConfigurationName(),dialog.op_mic,dialog.SR);
 
             configurations.add(configuration);
             return configuration;
@@ -71,7 +71,7 @@ public class AudioCapturePlugin implements CaptureProvider {
                 XElement[] pathsX = root.getElements("path");
                 for (XElement pathX : pathsX) {
                     String path = pathX.getString();
-                    AudioCaptureConfiguration c = new AudioCaptureConfiguration("",0);
+                    AudioCaptureConfiguration c = new AudioCaptureConfiguration();
                     Configuration config = c.fromFile(new File(file.getParentFile(), path));
                     if (config != null) {
                         mc.configurations.add(config);
