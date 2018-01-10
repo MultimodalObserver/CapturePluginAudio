@@ -61,7 +61,7 @@ public class AudioCaptureConfigurationDialog extends JDialog implements Document
         JLabel mic = new JLabel("Select your device:");
         JLabel samplerate = new JLabel("Select sample rate:");
         srValue = new JLabel("8000");
-        sSR = new JSlider(4000,8000);
+        sSR = new JSlider(4000,253064);
         
         Mixer.Info[] mixerInfos = AudioSystem.getMixerInfo();
         int i=0;

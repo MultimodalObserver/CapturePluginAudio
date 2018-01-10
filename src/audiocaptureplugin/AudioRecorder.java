@@ -74,7 +74,7 @@ public class AudioRecorder {
     class hilo extends Thread{
         public void run(){
             try {
-                AudioFormat aF = new AudioFormat(SampleRate, 16, 1, true, false);
+                AudioFormat aF = new AudioFormat(SampleRate, 16, 2, true, false);
                 tD.open(aF);
                 inicio=System.currentTimeMillis();
                 tD.start();                
