@@ -1,6 +1,7 @@
 package audiocaptureplugin;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.ResourceBundle;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Line;
 import javax.sound.sampled.Mixer;
@@ -30,6 +31,8 @@ public class AudioCaptureConfigurationDialog extends JDialog implements Document
     JSlider sSR;
     int SR;
     int op_mic;
+    ResourceBundle dialogBundle = java.util.ResourceBundle.getBundle("properties/principal");
+        
 
     boolean accepted = false;
 
@@ -57,9 +60,9 @@ public class AudioCaptureConfigurationDialog extends JDialog implements Document
         setLayout(new GridBagLayout());
         GridBConstraints gbc = new GridBConstraints();
 
-        JLabel label = new JLabel("Configuration name: ");
-        JLabel mic = new JLabel("Select your device:");
-        JLabel samplerate = new JLabel("Select sample rate:");
+        JLabel label = new JLabel(dialogBundle.getString("configuration_n"));
+        JLabel mic = new JLabel(dialogBundle.getString("select_d"));
+        JLabel samplerate = new JLabel(dialogBundle.getString("select_sr"));
         srValue = new JLabel("8000");
         sSR = new JSlider(4000,253064);
         
@@ -107,8 +110,7 @@ public class AudioCaptureConfigurationDialog extends JDialog implements Document
         errorLabel = new JLabel("");
         errorLabel.setForeground(Color.red);
         add(errorLabel, gbc.gx(0).gy(7).gw(5).a(GridBConstraints.LAST_LINE_START).wy(1));
-
-        accept = new JButton("Accept");
+        accept = new JButton(dialogBundle.getString("accept"));
         
         accept.addActionListener(new ActionListener() {
             @Override
@@ -151,7 +153,7 @@ public class AudioCaptureConfigurationDialog extends JDialog implements Document
 
     private void updateState() {        
         if (nameField.getText().isEmpty()) {
-            errorLabel.setText("A name for this configuration must be specified");
+            errorLabel.setText(dialogBundle.getString("name"));
             accept.setEnabled(false);
         } else {
             errorLabel.setText("");
