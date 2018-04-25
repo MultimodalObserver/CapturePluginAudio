@@ -10,8 +10,9 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
-import javax.swing.JSlider;
+import javax.swing.JSpinner;
 import javax.swing.JTextField;
+import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
@@ -23,12 +24,11 @@ import mo.organization.ProjectOrganization;
 public class AudioCaptureConfigurationDialog extends JDialog implements DocumentListener {
 
     JLabel errorLabel;
-    JLabel srValue;
     JTextField nameField;
     JButton accept;
     ProjectOrganization org;
     JComboBox cbMic;
-    JSlider sSR;
+    JSpinner sSR;
     int SR;
     int op_mic;
     ResourceBundle dialogBundle = java.util.ResourceBundle.getBundle("properties/principal");
@@ -63,8 +63,7 @@ public class AudioCaptureConfigurationDialog extends JDialog implements Document
         JLabel label = new JLabel(dialogBundle.getString("configuration_n"));
         JLabel mic = new JLabel(dialogBundle.getString("select_d"));
         JLabel samplerate = new JLabel(dialogBundle.getString("select_sr"));
-        srValue = new JLabel("8000");
-        sSR = new JSlider(4000,253064);
+        sSR = new JSpinner(new SpinnerNumberModel(8000,4000,120000,250));
         
         Mixer.Info[] mixerInfos = AudioSystem.getMixerInfo();
         int i=0;
@@ -97,15 +96,7 @@ public class AudioCaptureConfigurationDialog extends JDialog implements Document
         add(mic, gbc.gy(2).gx(0));
         add(cbMic,gbc.gx(2).gy(2).wx(1).gw(3));       
         add(samplerate, gbc.gy(4).gx(0));
-        add(srValue,gbc.gx(2).gy(4).wx(1).gw(1));
-        add(sSR,gbc.gy(6).wx(1).gw(2));
-              
-        sSR.addChangeListener(new ChangeListener(){
-            @Override
-            public void stateChanged(ChangeEvent e) {
-                srValue.setText(String.valueOf(sSR.getValue()));
-            }
-        });
+        add(sSR,gbc.gx(2).gy(4).wx(1).gw(2));
         
         errorLabel = new JLabel("");
         errorLabel.setForeground(Color.red);
@@ -117,7 +108,7 @@ public class AudioCaptureConfigurationDialog extends JDialog implements Document
             public void actionPerformed(ActionEvent e) {
                 accepted = true;                
                 op_mic=cbMic.getSelectedIndex();
-                SR=sSR.getValue();
+                SR=(int) sSR.getValue();
                 setVisible(false);
                 dispose();
             }
