@@ -1,158 +1,158 @@
 package audiocaptureplugin;
-import java.awt.*;
-import java.awt.event.*;
-import java.util.ResourceBundle;
+
+import java.util.Locale;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.Scene;
+import javafx.scene.control.*;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.paint.Color;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+import javafx.stage.Window;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Line;
 import javax.sound.sampled.Mixer;
 import javax.sound.sampled.TargetDataLine;
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JDialog;
-import javax.swing.JLabel;
-import javax.swing.JSpinner;
-import javax.swing.JTextField;
-import javax.swing.SpinnerNumberModel;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
-import mo.core.ui.GridBConstraints;
-import mo.core.ui.Utils;
-import mo.organization.ProjectOrganization;
+import java.util.ResourceBundle;
 
-public class AudioCaptureConfigurationDialog extends JDialog implements DocumentListener {
+public class AudioCaptureConfigurationDialog extends Stage {
 
-    JLabel errorLabel;
-    JTextField nameField;
-    JButton accept;
-    ProjectOrganization org;
-    JComboBox cbMic;
-    JSpinner sSR;
-    int SR;
-    int op_mic;
-    ResourceBundle dialogBundle = java.util.ResourceBundle.getBundle("properties/principal");
+    private final Label errorLabel;
+    private final TextField nameField;
+    private final ComboBox<String> cbMic;
+    private final Spinner<Integer> sSR;
+    private final Button accept;
+    private final Button cancel;
+
+    private boolean accepted = false;
+    private int op_mic;
+    private int SR;
+    
+    /*
+    //test to try different lenguages on the tab
+    Locale idiom = new Locale("en", "EN");
+    ResourceBundle dialogBundle = ResourceBundle.getBundle("properties/principal", idiom);
+    */
+    
+    ResourceBundle dialogBundle = ResourceBundle.getBundle("properties/principal");
+
+    public AudioCaptureConfigurationDialog(Window owner) {
+        setTitle(dialogBundle.getString("title"));
+        
+        initModality(Modality.APPLICATION_MODAL);
+        initOwner(owner);
+
+        GridPane grid = new GridPane();
+        grid.setPadding(new Insets(15, 15, 10, 15));
+        grid.setVgap(10);
+        grid.setHgap(10);
+        grid.setStyle("-fx-background-color: #d6cfcf;");
+        grid.setAlignment(Pos.CENTER);
+
+        Label nameLabel = new Label(dialogBundle.getString("configuration_n"));
         
 
-    boolean accepted = false;
-
-    public AudioCaptureConfigurationDialog() {
-        super(null, "Audio Capture Configuration", Dialog.ModalityType.APPLICATION_MODAL);
-    }
-
-    public AudioCaptureConfigurationDialog(ProjectOrganization organization) {
-        super(null, "Audio Capture Configuration", Dialog.ModalityType.APPLICATION_MODAL);
-        org = organization;
-    }
-
-    public boolean showDialog() {
-
-        setLayout(new GridBagLayout());
-
-        addWindowListener(new WindowAdapter() {
-            @Override
-            public void windowClosing(WindowEvent e) {
-                accepted = false;
-                super.windowClosing(e);
-            }
-        });
-
-        setLayout(new GridBagLayout());
-        GridBConstraints gbc = new GridBConstraints();
-
-        JLabel label = new JLabel(dialogBundle.getString("configuration_n"));
-        JLabel mic = new JLabel(dialogBundle.getString("select_d"));
-        JLabel samplerate = new JLabel(dialogBundle.getString("select_sr"));
-        sSR = new JSpinner(new SpinnerNumberModel(8000,4000,120000,250));
+        nameField = new TextField();
+        nameField.setMaxWidth(270);
+        nameField.textProperty().addListener((observable, oldValue, newValue) -> updateState());
         
+
+        Label micLabel = new Label(dialogBundle.getString("select_d"));
+        
+
+        cbMic = new ComboBox<>();
         Mixer.Info[] mixerInfos = AudioSystem.getMixerInfo();
-        int i=0;
-	for (Mixer.Info info: mixerInfos){
-		Mixer m = AudioSystem.getMixer(info);
-		Line.Info[] lineInfos = m.getTargetLineInfo();
-		if(lineInfos.length>=1 && lineInfos[0].getLineClass().equals(TargetDataLine.class)){//Only prints out info is it is a Microphone
-		    i++;		
-		}
-	}        
-        String[ ] microphones = new String[i];
-        i=0;
-        for (Mixer.Info info: mixerInfos){
-		Mixer m = AudioSystem.getMixer(info);
-		Line.Info[] lineInfos = m.getTargetLineInfo();
-		if(lineInfos.length>=1 && lineInfos[0].getLineClass().equals(TargetDataLine.class)){//Only prints out info is it is a Microphone
-		    microphones[i]=info.getName();
-                    i++;
-		}
-	}
-        cbMic = new JComboBox(microphones);
-        if(i>0){cbMic.setSelectedIndex(1);}
-        nameField = new JTextField();
-        nameField.getDocument().addDocumentListener(this);
-        sSR.setValue(8000);
-
-        gbc.gx(0).gy(0).f(GridBConstraints.HORIZONTAL).a(GridBConstraints.FIRST_LINE_START).i(new Insets(5, 5, 5, 5));
-        add(label, gbc);
-        add(nameField, gbc.gx(2).wx(1).gw(3));        
-        add(mic, gbc.gy(2).gx(0));
-        add(cbMic,gbc.gx(2).gy(2).wx(1).gw(3));       
-        add(samplerate, gbc.gy(4).gx(0));
-        add(sSR,gbc.gx(2).gy(4).wx(1).gw(2));
-        
-        errorLabel = new JLabel("");
-        errorLabel.setForeground(Color.red);
-        add(errorLabel, gbc.gx(0).gy(7).gw(5).a(GridBConstraints.LAST_LINE_START).wy(1));
-        accept = new JButton(dialogBundle.getString("accept"));
-        
-        accept.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                accepted = true;                
-                op_mic=cbMic.getSelectedIndex();
-                SR=(int) sSR.getValue();
-                setVisible(false);
-                dispose();
+        for (Mixer.Info info : mixerInfos) {
+            Mixer m = AudioSystem.getMixer(info);
+            Line.Info[] lineInfos = m.getTargetLineInfo();
+            if (lineInfos.length >= 1 && lineInfos[0].getLineClass().equals(TargetDataLine.class)) {
+                cbMic.getItems().add(info.getName());
             }
+        }
+        if (!cbMic.getItems().isEmpty()) cbMic.getSelectionModel().selectFirst();
+        cbMic.setMaxWidth(270);
+        
+
+        Label sampleRateLabel = new Label(dialogBundle.getString("select_sr"));
+        
+
+        sSR = new Spinner<>(4000, 120000, 8000, 250);
+        sSR.setEditable(true);
+        sSR.setMaxWidth(270);
+        
+
+        errorLabel = new Label();
+        errorLabel.setTextFill(Color.RED);
+        GridPane.setColumnSpan(errorLabel, 2);
+        
+
+        accept = new Button(dialogBundle.getString("accept"));
+        accept.setStyle("-fx-background-color: #b4eda6; -fx-text-fill: black;");
+        accept.setDisable(true);
+        accept.setOnAction(e -> {
+            accepted = true;
+            op_mic = cbMic.getSelectionModel().getSelectedIndex();
+            SR = sSR.getValue();
+            close();
         });
+        accept.setMaxWidth(100);
 
-        gbc.gx(0).gy(6).a(GridBConstraints.LAST_LINE_END).gw(3).wy(1).f(GridBConstraints.NONE);
-        add(accept, gbc);
+        cancel = new Button(dialogBundle.getString("cancel"));
+        cancel.setStyle("-fx-background-color: #ea908a; -fx-text-fill: black;");
+        cancel.setOnAction(e -> {
+            accepted = false;
+            close();
+        });
+        cancel.setMaxWidth(100);
 
-        setMinimumSize(new Dimension(400, 150));
-        setPreferredSize(new Dimension(400, 300));
-        pack();
-        Utils.centerOnScreen(this);
-        updateState();
-        setVisible(true);
+        HBox acceptBox = new HBox(accept);
+        acceptBox.setAlignment(Pos.CENTER_LEFT);
 
-        return accepted;
+        HBox cancelBox = new HBox(cancel);
+        cancelBox.setAlignment(Pos.CENTER_RIGHT);
+        
+        grid.add(nameLabel, 0, 0);
+        grid.add(micLabel, 0, 1);
+        grid.add(nameField, 1, 0);
+        grid.add(cbMic, 1, 1);
+        grid.add(sampleRateLabel, 0, 2);
+        grid.add(sSR, 1, 2);
+        grid.add(errorLabel, 0, 3);
+        grid.add(acceptBox, 0, 4);
+        grid.add(cancelBox, 1, 4);
+
+        Scene scene = new Scene(grid, 460, 200);
+        setScene(scene);
+
+        showAndWait();
     }
 
-    @Override
-    public void insertUpdate(DocumentEvent e) {
-        updateState();
-    }
-
-    @Override
-    public void removeUpdate(DocumentEvent e) {
-        updateState();
-    }
-
-    @Override
-    public void changedUpdate(DocumentEvent e) {
-        updateState();
-    }
-
-    private void updateState() {        
+    private void updateState() {
         if (nameField.getText().isEmpty()) {
             errorLabel.setText(dialogBundle.getString("name"));
-            accept.setEnabled(false);
+            accept.setDisable(true);
         } else {
             errorLabel.setText("");
-            accept.setEnabled(true);
+            accept.setDisable(false);
         }
+    }
+    
+
+    public boolean isAccepted() {
+        return accepted;
     }
 
     public String getConfigurationName() {
         return nameField.getText();
+    }
+
+    public int getSelectedMic() {
+        return op_mic;
+    }
+
+    public int getSampleRate() {
+        return SR;
     }
 }

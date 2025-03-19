@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.stage.Stage;
 import mo.capture.CaptureProvider;
 import mo.core.plugin.Extends;
 import mo.core.plugin.Extension;
@@ -23,13 +24,10 @@ import mo.organization.StagePlugin;
             @Extends(extensionPointId = "mo.capture.CaptureProvider")
         }
 )
-
 public class AudioCapturePlugin implements CaptureProvider {
 
-     List<Configuration> configurations;   
-    
+    List<Configuration> configurations;   
     private static final Logger logger = Logger.getLogger(AudioCapturePlugin.class.getName());
-    private AudioCaptureConfigurationDialog dialog;
 
     public AudioCapturePlugin() {
         configurations = new ArrayList<>();
@@ -42,13 +40,17 @@ public class AudioCapturePlugin implements CaptureProvider {
 
     @Override
     public Configuration initNewConfiguration(ProjectOrganization organization) {
+        Stage stage = new Stage();
+        AudioCaptureConfigurationDialog dialog = new AudioCaptureConfigurationDialog(stage);
 
-         dialog = new AudioCaptureConfigurationDialog(organization);
-
-        boolean accepted = dialog.showDialog();
+        boolean accepted = dialog.isAccepted();
 
         if (accepted) {
-            AudioCaptureConfiguration configuration = new AudioCaptureConfiguration(dialog.getConfigurationName(),dialog.op_mic,dialog.SR);
+            AudioCaptureConfiguration configuration = new AudioCaptureConfiguration(
+                dialog.getConfigurationName(), 
+                dialog.getSelectedMic(), 
+                dialog.getSampleRate()
+            );
 
             configurations.add(configuration);
             return configuration;
@@ -64,7 +66,7 @@ public class AudioCapturePlugin implements CaptureProvider {
 
     @Override
     public StagePlugin fromFile(File file) {
-       if (file.isFile()) {
+        if (file.isFile()) {
             try {
                 AudioCapturePlugin mc = new AudioCapturePlugin();
                 XElement root = XIO.readUTF(new FileInputStream(file));
